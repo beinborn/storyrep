@@ -1,20 +1,18 @@
-from encoding_pipeline.isolated_pipeline import SingleInstancePipeline
 from read_dataset.read_stories_data import StoryDataReader
 from language_models.random_encoder import RandomEncoder
 from language_models.bert_encoder import BertEncoder
 from mapping_models.ridge_regression_mapper import RegressionMapper
-import logging
+
 from evaluation.metrics import *
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
+
 # Here, I am analyzing story representations with Bert
 user_dir = "/Users/lisa/"
 
 kaplan_dir = user_dir + "Corpora/Kaplan_data/"
 save_dir = user_dir + "/Experiments/multilingual/"
 
-# Use this to set up Mitchell and Kaplan experiments
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
@@ -39,14 +37,14 @@ if __name__ == '__main__':
         for block in story_data[subject]:
             scans.append(block.scan_events[0].scan)
         subject_scans[subject] = scans
+
+        # I tested clustering the stories based on the scans with and without applying PCA.
+        # Resulting clusters are very diverse, you can ignore them for now.
+
         # print("Run clustering")
         # kmeans = KMeans(n_clusters=5, random_state=0).fit(scans)
         # y_kmeans = kmeans.predict(scans)
         # print(y_kmeans)
-
-
-
-
         # print("Plot reduced scans")
         # plt.scatter(reduced_scans[:, 0], reduced_scans[:, 1], c=y_kmeans, s=50, cmap='viridis')
         # # Add story indices as labels
@@ -56,6 +54,7 @@ if __name__ == '__main__':
         #     plt.text(x+0.1, y+0.1, i, fontsize=9)
         # plt.title(str(subject))
         # plt.show()
+        # #Print clusters
         # for label in range(0,5):
         #     print("Stories in Cluster " + str(label))
         #     print(np.where(kmeans.labels_ == label))
@@ -77,8 +76,9 @@ if __name__ == '__main__':
     data = [subject_scans[x] for x in subjects]
     data.append(embeddings)
     reduced_data = []
+
+    # Test: Apply pca on scans to reduce the dimensionality
     for rep in data:
-        # Test: apply pca on scans to reduce the dimensionality
         print("Run PCA")
         pca = PCA(n_components=40)
         print("Fit PCA")
@@ -86,7 +86,8 @@ if __name__ == '__main__':
         print("Transform scans")
         reduced_data.append(pca.transform(rep))
 
-
+    # These two functions automatically produce plots.
+    # Edit evaluation.metrics to suppress them or add more detailed plots.
     x, C = get_dists(data, labels)
     spearman, pearson, kullback = compute_distance_over_dists(x, C, labels)
 
