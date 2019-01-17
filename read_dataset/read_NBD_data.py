@@ -2,7 +2,7 @@ from os import listdir
 import nibabel as nib
 import numpy as np
 from .scan_elements import ScanEvent
-from .read_fmri_data_abstract import FmriReader
+from .abstract_fmri_reader import FmriReader
 
 
 

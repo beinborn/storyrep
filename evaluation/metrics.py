@@ -10,6 +10,7 @@ from . import evaluation_util
 import math
 import logging
 
+
 # This is a collection of evaluation metrics that can be used for evaluating encoding and decoding experiments.
 # We re-use implementations from sklearn and scipy.
 
@@ -84,7 +85,7 @@ def pearson_correlation(vector1, vector2):
 # Complex means that we return the raw values, the average and the mean.
 # We repeat this and report the results for only the top n voxels.
 
-def r2_score_complex(predictions, targets, n = 500):
+def r2_score_complex(predictions, targets, n=500):
     r2values = r2_score(targets, predictions, multioutput="raw_values")
     nan = 0
     adjusted_r2 = []
@@ -103,7 +104,6 @@ def r2_score_complex(predictions, targets, n = 500):
 
     top_r2 = sorted(adjusted_r2)[-n:]
 
-
     return adjusted_r2, np.mean(np.asarray(adjusted_r2)), np.sum(np.asarray(adjusted_r2)), top_r2, np.mean(
         np.asarray(top_r2)), np.sum(np.asarray(top_r2))
 
@@ -119,7 +119,7 @@ def explained_variance_complex(predictions, targets, n=500):
         # We need to check for these.
         if math.isnan(score):
             print("Found nan")
-            nan +=1
+            nan += 1
             adjusted_ev.append(0.0)
         else:
             adjusted_ev.append(score)
@@ -166,10 +166,11 @@ def pearson_jain_complex(predictions, targets):
         np.asarray(corr_squared_per_voxel)), np.asarray(top_corr), np.mean(np.asarray(top_corr)), np.sum(
         np.asarray(top_corr))
 
-def pearson_complex(predictions, targets, n = 500):
+
+def pearson_complex(predictions, targets, n=500):
     correlations_per_voxel = []
     nan = 0
-    for voxel_id in range(0,len(targets[0])):
+    for voxel_id in range(0, len(targets[0])):
 
         # Constant voxels should have been removed in voxel selection.
         # It might occur though, that we find a voxel that is constantly 0 in the test data,
@@ -191,7 +192,9 @@ def pearson_complex(predictions, targets, n = 500):
     print("Number of NaN: " + str(nan))
     top_corr = sorted(correlations_per_voxel)[-500:]
     correlations_per_voxel.append(correlation)
-    return np.asarray(correlations_per_voxel), np.mean(np.asarray(correlations_per_voxel)), np.sum(np.asarray(correlations_per_voxel)),  np.asarray(top_corr), np.mean(np.asarray(top_corr)), np.sum(np.asarray(top_corr))
+    return np.asarray(correlations_per_voxel), np.mean(np.asarray(correlations_per_voxel)), np.sum(
+        np.asarray(correlations_per_voxel)), np.asarray(top_corr), np.mean(np.asarray(top_corr)), np.sum(
+        np.asarray(top_corr))
 
 
 # This is used for evaluating the mapping model.
@@ -204,13 +207,14 @@ def mse(predictions, targets):
     """
     return mean_squared_error(predictions, targets)
 
+
 # ----- Representational similarity analysis ------ #
 
 # Methods for calculating dissimilarity matrices
 # In the original papers, they are called RDMs
 # Data is a list of n vector lists.
 #
-def get_dists(data, labels =[]):
+def get_dists(data, labels=[]):
     logging.info("Calculating dissimilarity matrix")
     x = {}
     C = {}
@@ -226,11 +230,12 @@ def get_dists(data, labels =[]):
         # Normalize
         C[i] /= C[i].max()
 
-    for i in range(25,len(C.keys())):
+    for i in range(0, 4):
         print(C[i].shape)
         print("Start plotting")
-        plot(C[i], [x for x in range(1,41)],labels[i] )
+        plot(C[i], [x for x in range(1, 41)], labels[i],cbarlabel="Cosine Distance")
     return x, C
+
 
 # Compare two or more RDMs
 def compute_distance_over_dists(x, C, labels):
@@ -253,7 +258,14 @@ def compute_distance_over_dists(x, C, labels):
                 corr_p.append(p)
             spearman[i][j] = np.mean(corr_s)
             pearson[i][j] = np.mean(corr_p)
+        # get indexes of the 6 highest values
+        max_indexes = np.argpartition(pearson[i], -6)[-6:]
+        print("Representations which correlate most with: " + labels[i])
+        # Ignore self (correlation =1)
+        print([labels[x] for x in max_indexes if not x == i])
+
     print(spearman, pearson, kullback)
-    plot(kullback, labels, title= "RDM Comparison Kullback")
-    plot(pearson, labels, title="RDM Comparison Pearson")
+    plot(kullback, labels, title="RDM Comparison Kullback", cbarlabel="KL Divergence")
+    plot(pearson, labels, title="RDM Comparison Pearson", cbarlabel="Pearson Correlation")
+    plot(spearman, labels, title="RDM Comparison Spearman", cbarlabel="Spearman Correlation")
     return spearman, pearson, kullback

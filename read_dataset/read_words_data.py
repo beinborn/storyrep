@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.io
 from .scan_elements import Block, ScanEvent
-from .read_fmri_data_abstract import FmriReader
+from .abstract_fmri_reader import FmriReader
 import os.path
 import pickle
 

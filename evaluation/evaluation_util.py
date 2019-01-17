@@ -34,7 +34,9 @@ def add_to_collected_results( current_results, collected_results):
 
 
 # Update a dictionary of results.
-# This method is very specific, might have to be updated, in case you change the evaluation setup.
+# Here we have very specific keys and a predetermined result order
+# Method should be updated to be more generic.
+
 def update_results(current_results,collected_results):
     for key, value in current_results.items():
         i = 0

@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 from openpyxl import load_workbook
 from .scan_elements import Block, ScanEvent
-from .read_fmri_data_abstract import FmriReader
+from .abstract_fmri_reader import FmriReader
 import spacy
 
 

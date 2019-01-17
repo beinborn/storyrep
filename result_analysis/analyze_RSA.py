@@ -8,14 +8,14 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # Code for plotting by Samira, slightly modified
 
-def plot(data, labels, title =""):
+def plot(data, labels, title ="", cbarlabel = "Cosine Distance"):
     plt.rcParams["axes.grid"] = False
     plt.interactive(False)
 
     fig, ax = plt.subplots(figsize=(20, 20))
 
     im, cbar = heatmap(data, labels, labels, ax=ax,
-                       cmap="BuPu_r", cbarlabel="Cosine Distance", title = title)
+                       cmap="BuPu_r", title = title, cbarlabel = cbarlabel)
 
     fig.tight_layout()
     print("Show plot")

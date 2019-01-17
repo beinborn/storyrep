@@ -263,8 +263,7 @@ class ContinuousPipeline(Pipeline):
                     # but there is a tiny difference in the Harry dataset leading to a different number of sentences.
                     # That's why we get the embeddings separately for each subject
                     # See the notes on sentence tokenization in read_dataset.read_harry_potter_data
-                    sentence_embeddings = self.stimuli_encoder.get_sentence_embeddings(
-                        self.pipeline_name + "/embeddings/" + str(subject) + "_" + str(block.block_id) + "_", sentences)
+                    sentence_embeddings = self.stimuli_encoder.get_sentence_embeddings(sentences, name=self.pipeline_name + "/embeddings/" + str(subject) + "_" + str(block.block_id) + "_")
                     logging.info("Sentence embeddings obtained: " + str(len(sentence_embeddings)))
 
                     scans = [event.scan for event in block.scan_events]

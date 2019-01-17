@@ -344,10 +344,10 @@ class SingleInstancePipeline(Pipeline):
                     stimuli = [word[0] for word in stimuli]
                     print(stimuli)
                     embeddings = self.stimuli_encoder.get_word_embeddings(
-                        self.pipeline_name + "/embeddings/" + str(subject) + "_", stimuli)
+                        stimuli, name=self.pipeline_name + "/embeddings/" + str(subject) + "_")
                 else:
                     embeddings = self.stimuli_encoder.get_story_embeddings(
-                        self.pipeline_name + "/embeddings/" + str(subject) + "_", stimuli)
+                        stimuli, name= self.pipeline_name + "/embeddings/" + str(subject) + "_")
 
                 logging.info("Embeddings obtained")
 

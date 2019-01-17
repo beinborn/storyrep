@@ -2,7 +2,7 @@ import numpy as np
 import regex as re
 from os import listdir
 from .scan_elements import Block, ScanEvent
-from .read_fmri_data_abstract import FmriReader
+from .abstract_fmri_reader import FmriReader
 from language_preprocessing.tokenize import SpacyTokenizer
 import os
 
