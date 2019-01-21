@@ -230,10 +230,10 @@ def get_dists(data, labels=[]):
         # Normalize
         C[i] /= C[i].max()
 
-    for i in range(0, 4):
+    for i in C:
         print(C[i].shape)
         print("Start plotting")
-        plot(C[i], [x for x in range(1, 41)], labels[i],cbarlabel="Cosine Distance")
+        plot(C[i], [x for x in range(1, len(C[i]+1))], labels[i],cbarlabel="Cosine Distance")
     return x, C
 
 
@@ -258,11 +258,11 @@ def compute_distance_over_dists(x, C, labels):
                 corr_p.append(p)
             spearman[i][j] = np.mean(corr_s)
             pearson[i][j] = np.mean(corr_p)
-        # get indexes of the 6 highest values
-        max_indexes = np.argpartition(pearson[i], -6)[-6:]
-        print("Representations which correlate most with: " + labels[i])
-        # Ignore self (correlation =1)
-        print([labels[x] for x in max_indexes if not x == i])
+        # # get indexes of the 6 highest values
+        # max_indexes = np.argpartition(pearson[i], -6)[-6:]
+        # print("Representations which correlate most with: " + labels[i])
+        # # Ignore self (correlation =1)
+        # print([labels[x] for x in max_indexes if not x == i])
 
     print(spearman, pearson, kullback)
     plot(kullback, labels, title="RDM Comparison Kullback", cbarlabel="KL Divergence")
