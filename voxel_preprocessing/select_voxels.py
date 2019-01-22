@@ -17,6 +17,13 @@ def select_varied_voxels(train_activations):
     selected_ids = np.where(abs(np.std(train_activations, 0)) > 0)[0]
     return selected_ids.tolist()
 
+def select_most_varied_voxels(data):
+    variance_scores = np.var(data, axis =0)
+    print(variance_scores)
+    sorted_voxels_ids = sorted(range(len(variance_scores)), key=lambda i: variance_scores[i])
+    for i in range(0,15):
+        print(variance_scores[sorted_voxels_ids[i]])
+    return sorted_voxels_ids
 
 # Make sure that model-driven voxel selection is ONLY performed on the train_sets, or even better on a development set.
 def select_voxels_by_variance(train_predictions, train_targets):
@@ -41,8 +48,6 @@ def select_voxels_by_r(train_predictions, train_targets):
     print("Sorted voxel ids: " + str(len(sorted_voxels_ids)))
     return sorted_voxels_ids
 
-    # return list of ids of voxels
-    return topn_voxels_ids
 
 # Theory-driven voxel selection:
 # Determine a list of regions of interest and only analyze voxels in these regions.

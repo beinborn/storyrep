@@ -35,7 +35,6 @@ def save_all_stable_voxels(subject_id, data_dir, words2scans, number_of_stable_v
 
 
 def calculate_stable_voxels(subject_id, words2scans, number_of_selected_voxels):
-    stable_voxel_ids = []
     all_words = [word for word in words2scans.keys()]
     # Number of voxels differs for each subject, but is the same for every stimulus
     # I am simply checking the number of voxels for the example word "window" here.

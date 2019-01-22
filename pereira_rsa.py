@@ -62,7 +62,7 @@ if __name__ == '__main__':
     story_pooling = "sum"
     for encoder in (bertencoder, elmoencoder, random_wordbased_encoder, truely_random_encoder):
 
-        embeddings = encoder.get_story_embeddings(stimuli, name="Pererira/sum",
+        embeddings = encoder.get_story_embeddings(stimuli, name=save_dir + "/sum",
                                                   sentence_pooling_mode=sentence_pooling,
                                                   story_pooling_mode=story_pooling)
         embeddings_container.append(embeddings)

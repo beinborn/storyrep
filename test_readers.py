@@ -164,32 +164,33 @@ data_dir = "/Users/lisa/Corpora/"
 # print("\n\nDutch Narrative Data")
 # nbd_reader = NBDReader(data_dir=nbd_dir)
 # nbd_data = nbd_reader.read_all_events()
-# print("Number of scans: " + str(len(nbd_data)))
-# print("Subjects: " + str({event.subject_id for event in nbd_data}))
-# print("Runs: " + str({event.block for event in nbd_data}))
-# print("Examples: ")
-# for i in range(0, 10):
-#     print(vars(nbd_data[i]))
+# for subject_id in nbd_data.keys():
+#     for block in nbd_data[subject_id]:
+#         sentences = block.sentences
+#         scans = [event.scan for event in block.scan_events]
+#         stimuli = [event.stimulus_pointers for event in block.scan_events]
+#         timestamps = [event.timestamp for event in block.scan_events]
+#
+#         print("\n\nBLOCK: " + str(block.block_id))
+#         print("Number of scans: " + str(len(scans)))
+#         print("Number of stimuli: " + str(len(stimuli)))
+#         print("Number of timestamps: " + str(len(timestamps)))
+#         print("Stimulus: \n" + str(stimuli))
+#         print("Sentences: \n" + str(sentences))
+#         print(np.asarray(scans[0]).shape)
 
 
 # ---- Pereira DATA -----
 # Make sure to get the data at https://evlab.mit.edu/sites/default/files/documents/index.html
 
 print("\n\Pereira Data")
-pereira_reader = PereiraReader(data_dir=data_dir + "pereira_data/", experiment=2)
+pereira_reader = PereiraReader(data_dir=data_dir + "pereira_data/subject_data/", experiment=3)
 
-# for testing experiment 1
-# subject_id = [11, 2]
 
-# for testing experiment 2 & 3
-subject_id = [2]
-
-# general testing with 1 subject
-# subject_id = [2]
-
-pereira_data = pereira_reader.read_all_events(subject_ids=subject_id)
+pereira_data = pereira_reader.read_all_events()
 all_scans = []
-for subject_id in subject_id:
+for subject_id in pereira_data.keys():
+    print(subject_id)
     for block in pereira_data[subject_id]:
         sentences = block.sentences
         scans = [event.scan for event in block.scan_events]
@@ -200,6 +201,6 @@ for subject_id in subject_id:
         print("Number of scans: " + str(len(scans)))
         print("Number of stimuli: " + str(len(stimuli)))
         print("Number of timestamps: " + str(len(timestamps)))
-        print("Stimulus: \n" + str(stimuli))
-        print("Word: \n" + str(sentences))
+        print("Stimuli: \n" + str(stimuli))
+        print("Sentence: \n" + str(sentences))
         print(np.asarray(scans[0]).shape)

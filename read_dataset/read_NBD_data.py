@@ -1,9 +1,9 @@
 from os import listdir
 import nibabel as nib
 import numpy as np
-from .scan_elements import ScanEvent
+from .scan_elements import ScanEvent, Block
 from .abstract_fmri_reader import FmriReader
-
+from language_preprocessing.tokenize import SpacyTokenizer
 
 
 # This method reads the Narrative Brain Dataset that was published by Lopopolo et al 2018.
@@ -24,24 +24,27 @@ from .abstract_fmri_reader import FmriReader
 class NBDReader(FmriReader):
     def __init__(self, data_dir):
         super(NBDReader, self).__init__(data_dir)
+        self.tokenizer = SpacyTokenizer()
 
     def read_all_events(self, subject_ids=None, **kwargs):
 
         # --- READ TEXT STIMULI----
         stimuli = {}
+        blocks ={}
         for narrative_id in range(1, 4):
             stimuli[narrative_id] = self.get_text_stimuli(self.data_dir, narrative_id)
 
         # --- PROCESS FMRI SCANS --- #
-        all_events = []
         if subject_ids == None:
             subject_ids = [file for file in listdir(self.data_dir + 'fmri/') if file.startswith('S')]
         for subject in subject_ids:
+            blocks_for_subject = []
             for narrative_id in range(1, 4):
                 print("Processing data for subject: " + subject + " narrative: " + str(narrative_id))
-                all_events.extend(self.read_run(self.data_dir, subject, narrative_id, stimuli[narrative_id]))
+                blocks_for_subject.append(self.read_run(self.data_dir, subject, narrative_id, stimuli[narrative_id]))
+        blocks[subject] = blocks_for_subject
 
-        return all_events
+        return blocks
 
     def read_run(self, data_dir, subject, narrative_id, stimuli):
         fmri_dir = data_dir + 'fmri/'
@@ -52,7 +55,7 @@ class NBDReader(FmriReader):
         # We use vswrs files, the letters correspond to preprocessing
         # “v” = motion correction, “s" = smoothing, “w" = normalisation, “r" = realign
         fmri_data = [file for file in listdir(current_dir) if
-                     (file.endswith('.nii') and file.startswith('coreg_vswrs'))]
+                     (file.endswith('.nii') and file.startswith('vswrs'))]
 
         # Each file corresponds to one scan taken every 0.88 seconds
         scan_time = 0.0
@@ -61,10 +64,13 @@ class NBDReader(FmriReader):
 
         events = []
         sentences = []
+
         seen_text = ""
+        sentence_id = 0
+        token_id = 0
 
         for niifile in sorted(fmri_data):
-
+            stimulus_pointers = []
             # img.header can give a lot of metadata
             scan = nib.load(current_dir + niifile)
             image_array = np.asarray(scan.dataobj)
@@ -74,30 +80,38 @@ class NBDReader(FmriReader):
             # Get word sequence that has been played during previous and current scan
             word_sequence = ''
             while (word_time < scan_time) and (word_index + 1 < len(stimuli)):
-                if len(word) > 0:
-                    if self.is_end_of_sentence(seen_text.strip()):
-                        sentences.append(seen_text)
-                        seen_text = word.strip() + " "
 
-                    # Simply add word to the current sentence
-                    else:
-                        if len(word) > 0:
-                            seen_text = seen_text + word.strip() + " "
-                    word_sequence += word + " "
+                if len(word) > 0:
+                    tokens = self.tokenizer.tokenize(word)
+                    for token in tokens:
+                        if len(sentences) > 0:
+                            if self.is_end_of_sentence(seen_text.strip()):
+                                sentence_id += 1
+                                token_id = 0
+                                sentences.append([token])
+                                seen_text = token.strip() + " "
+                            else:
+                                sentences[sentence_id].append(token)
+                                token_id += 1
+                                seen_text = seen_text + token.strip() + " "
+
+                        # Add first word to sentences
+                        else:
+                            sentences = [[token]]
+                        stimulus_pointers.append((sentence_id, token_id))
 
                 word_index += 1
                 word_time, word = stimuli[word_index]
-            word_sequence = word_sequence.replace('  ', ' ')
 
-            # Set values of event
-            # Not yet implemented: deriving the stimulus pointers from the stimulus
-            #event = ScanEvent(subject, stimulus_pointers, scan_time, voxel_vector)
+            # Set a scan event
 
-
-#            events.append(event)
+            scan_event = ScanEvent(subject_id=subject, stimulus_pointers=stimulus_pointers,
+                                   timestamp=scan_time, scan=voxel_vector)
             scan_time += 0.88
+            events.append(scan_event)
 
-        return events
+        # Return block
+        return Block(subject, narrative_id, sentences, events)
 
     # --- PROCESS TEXT STIMULI --- #
     # The text is already aligned with presentation times in a tab-separated file and ordered sequentially.
@@ -109,7 +123,7 @@ class NBDReader(FmriReader):
                   errors="replace") as textdata:
             for line in textdata:
                 word, onset, offset, duration = line.strip().split('\t')
-                stimuli.append([float(onset), word])
+                stimuli.append([float(onset), word.strip()])
         return stimuli
 
     # Sentence boundary detection for the NBD data is very simple.

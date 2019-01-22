@@ -59,8 +59,4 @@ class BertEncoder(TextEncoder):
         self.save_embeddings(embedding_file, embeddings)
         return embeddings
 
-# For testing
-# if __name__ == '__main__':
-#     bert_encoder = BertEncoder("/Users/lisa/Experiments/multilingual")
-#     sentences = [ "All right.", "Lasst uns froh und munter sein. ", "Mais pourquoi?", "Por que no te callas"]
-#     bert_encoder.get_sentence_embeddings("test", sentences)
+xs

@@ -23,6 +23,7 @@ class HarryPotterReader(FmriReader):
 
     def __init__(self, data_dir):
         super(HarryPotterReader, self).__init__(data_dir)
+        self.tokenizer = SpacyTokenizer()
 
     def read_all_events(self, subject_ids=None):
         # Collect scan events
@@ -87,7 +88,7 @@ class HarryPotterReader(FmriReader):
         sentences = []
         sentence_id = 0
         token_id = 0
-        tokenizer = SpacyTokenizer()
+
         # Iterate through scans
         scans = datafile["data"]
 
@@ -109,7 +110,7 @@ class HarryPotterReader(FmriReader):
                 word = word.replace("@", "")
                 # I am tokenizing the word in the reader because I only use the elmo embedding.
                 # If we want to switch embedders, it is better to have tokenization as a separate module
-                tokenized_words = tokenizer.tokenize(word)
+                tokenized_words = self.tokenizer.tokenize(word)
                 for token in tokenized_words:
                     if len(sentences) > 0:
                         if self.is_beginning_of_new_sentence(sentences[sentence_id], token):
@@ -168,6 +169,22 @@ class HarryPotterReader(FmriReader):
         #for name in roi_names:
          # print(name[0])
         return voxel_to_xyz
+
+    def get_voxel_to_mni_mapping(self, subject_id):
+
+        metadata = scipy.io.loadmat(self.data_dir + "subject_" + str(subject_id) + ".mat")["meta"]
+        coordinates_of_nth_voxel = self.get_voxel_to_xyz_mapping(subject_id)
+        mni_transform = metadata[0][0][12]
+        print(mni_transform)
+        voxel_to_mni = {}
+        for voxel in range(0, len(coordinates_of_nth_voxel.keys())):
+            xyz = coordinates_of_nth_voxel[voxel]
+            # Transformation matrix is 4x4 so we add a 1
+            xyz4 = np.append(xyz,1)
+            transformed = mni_transform.dot(xyz4)
+            # get rid of the 4th dimension again
+            voxel_to_mni[voxel] = transformed[0:3]
+        return voxel_to_mni
 
     # This is a quite naive sentence boundary detection that only works for this dataset.
     # Please note: after the experiments, I figured out that in the data, they sometimes use "..." and sometimes "…" for the stimuli
