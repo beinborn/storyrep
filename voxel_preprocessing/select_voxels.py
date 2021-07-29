@@ -6,7 +6,7 @@ from sklearn.metrics import explained_variance_score
 
 # ----- Methods to reduce the number of voxels -----
 
-# This method returns all voxel ids of voxels with stdev 0 in the data.
+# This method returns all voxel ids of voxels with stdev > 0 in the data.
 # This is like removing the constant voxels, but we want to make sure that the ids remain the same.
 # Removing constant voxels is a necessary step before applying z-score.
 # However, it should be applied reasonably.
